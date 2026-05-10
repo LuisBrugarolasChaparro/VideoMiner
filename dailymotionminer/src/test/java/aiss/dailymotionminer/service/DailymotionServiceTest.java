@@ -16,61 +16,73 @@ class DailymotionServiceTest {
     @Autowired
     DailymotionService service;
 
-    // Usa un canal real de Dailymotion
     private final String realUserId = "x51lpey";   // Canal real de ejemplo
     private final String realVideoId = "xn6y98";  // Vídeo real de ejemplo
 
     @Test
-    @DisplayName("Get Channel from Dailymotion")
+    @DisplayName("Get Channel from Dailymotion - Validación completa")
     void getChannel() {
         Channel channel = service.getChannel(realUserId);
+
         assertNotNull(channel, "El canal no puede ser null");
         assertNotNull(channel.getId(), "El canal debe tener id");
-        System.out.println(channel);
+        assertNotNull(channel.getNickname(), "El canal debe tener nombre");
+        assertTrue(channel.getId().length() > 0, "El id no puede estar vacío");
+
+        System.out.println("Canal obtenido: " + channel);
     }
 
     @Test
-    @DisplayName("Get List of Videos from Dailymotion")
+    @DisplayName("Get List of Videos - Validación completa")
     void getListVideos() {
         List<Video> videos = service.getListVideos(realUserId, 5, 1);
+
         assertNotNull(videos, "La lista no puede ser null");
         assertFalse(videos.isEmpty(), "La lista de vídeos está vacía");
+        assertTrue(videos.size() <= 5, "Se han devuelto más vídeos de los solicitados");
+        System.out.println("Vídeos obtenidos: " + videos.size());
         System.out.println(videos);
-        System.out.println("Total vídeos: " + videos.size());
     }
 
     @Test
-    @DisplayName("Get User from Dailymotion")
+    @DisplayName("Get User from Dailymotion - Validación completa")
     void getUser() {
         User user = service.getUser(realUserId);
+
         assertNotNull(user, "El usuario no puede ser null");
-        assertNotNull(user.getId(), "El usuario debe tener id");
-        System.out.println(user);
+        assertEquals(realUserId, user.getId(), "El ID del usuario no coincide");
+        assertNotNull(user.getNickname(), "El usuario debe tener username");
+
+        System.out.println("Usuario obtenido: " + user);
     }
 
     @Test
-    @DisplayName("Get Tags from Dailymotion Video")
+    @DisplayName("Get Tags from Dailymotion Video - Validación completa")
     void getTags() {
         Tag tags = service.getTags(realVideoId);
-        // Puede ser null si el vídeo no tiene tags
-        if (tags != null) {
+
+        if (!tags.getTags().isEmpty()) {
             assertNotNull(tags.getTags(), "La lista de tags no puede ser null");
-            System.out.println(tags.getTags());
+            System.out.println("Tags: " + tags.getTags());
         } else {
-            System.out.println("El vídeo no tiene tags o no existen");
+            System.out.println("El vídeo no tiene tags");
         }
     }
 
     @Test
-    @DisplayName("Get Subtitles from Dailymotion Video")
+    @DisplayName("Get Subtitles from Dailymotion Video - Validación completa")
     void getSubtitles() {
         SubtitleContainer subtitles = service.getSubtitles(realVideoId);
-        // Puede ser null si no hay subtítulos
+
         if (!subtitles.getList().isEmpty()) {
             assertNotNull(subtitles.getList(), "La lista de subtítulos no puede ser null");
-            System.out.println(subtitles.getList());
+            Subtitle first = subtitles.getList().isEmpty() ? null : subtitles.getList().get(0);
+            assertNotNull(first.getLanguageLabel(), "El subtítulo debe tener idioma");
+            assertNotNull(first.getUrl(), "El subtítulo debe tener URL");
+            System.out.println("Subtítulos: " + subtitles.getList());
         } else {
-            System.out.println("El vídeo no tiene subtítulos o no existen");
+            System.out.println("El vídeo no tiene subtítulos");
         }
     }
 }
+
